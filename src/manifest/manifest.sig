@@ -1,6 +1,6 @@
 signature MANIFEST = sig
   type t
-  type pkgpath = {host:string,owner:string,repo:string}
+  type pkgpath = {protocol:string,protocol_user:string,host:string,owner:string,repo:string}
   type semver = SemVer.t
   type hash = string
   type filename = string

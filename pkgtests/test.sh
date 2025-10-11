@@ -48,6 +48,8 @@ rm -rf futhark.pkg lib
 
 succeed $FUTPKG init github.com/sturluson/testpkg
 
+succeed $FUTPKG add git@git.sr.ht:~pzel/sqlite3 0.2.0
+
 succeed $FUTPKG add github.com/athas/fut-foo 0.1.0
 
 succeed $FUTPKG sync

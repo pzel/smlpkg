@@ -34,7 +34,8 @@ struct
       M.lookup (pkgVersions pi) v
 
   fun majorRevOfPkg (p: pkgpath) : pkgpath * int list =
-      let fun mk r = {host= #host p, owner= #owner p, repo= r}
+      let fun mk r = {host= #host p, owner= #owner p, repo= r,
+                      protocol= #protocol p, protocol_user= #protocol_user p}
       in case String.fields (fn c => c = #"@") (#repo p) of
              [r,v] => (case Int.fromString v of
                            SOME i => if Int.toString i = v then (mk r,[i])

@@ -15,15 +15,16 @@ in
   fun set_smlpkg_filename s = filename := s
 end
 
-type pkgpath = {host:string,owner:string,repo:string}
+type pkgpath = {protocol:string,protocol_user:string,host:string,owner:string,repo:string}
+
+fun mkPkgPath host owner repo = {protocol="ssh:",
+                                 protocol_user="git",
+                                 host=host,
+                                 owner=owner,
+                                 repo=repo}
 
 fun pkgpathToString (p:pkgpath) : string =
     #host p ^ "/" ^ #owner p ^ "/" ^ #repo p
-
-fun pkgpathFromString (p:string) : pkgpath option =
-    case String.fields (fn c => c = #"/") p of
-        [host,owner,repo] => SOME {host=host,owner=owner,repo=repo}
-      | _ => NONE
 
 type semver = SemVer.t
 type hash = string
@@ -71,10 +72,29 @@ fun p_symb nil = NO (R.botloc,fn () => "reached end-of-file")
                  fn () => ("expecting symbol but found token " ^
                            L.pr_token t))
 
-val p_pkgpath : pkgpath p =
+val p_git_path : pkgpath p =
+    let fun cleanRepo s = if String.isSuffix ".git" s
+                          then String.substring(s,0, String.size s - 4)
+                          else s
+    in
+      ((p_id >>- eat (L.Symb #"@"))
+           >>> (p_id >>- eat (L.Symb #":"))
+           >>> (p_id >>- eat (L.Symb #"/"))
+           >>> p_id)
+          oo (fn (((a,b),c),d) => {protocol="ssh:",
+                                   protocol_user=a,
+                                   host=b,
+                                   owner=c,
+                                   repo= cleanRepo d})
+    end
+
+val p_pkgpath_legacy: pkgpath p =
     ((p_id >>- eat (L.Symb #"/")) >>>
      (p_id >>- eat (L.Symb #"/")) >>> p_id) oo
-        (fn ((a,b),c) => {host=a,owner=b,repo=c})
+        (fn ((a,b),c) => mkPkgPath a b c)
+
+val p_pkgpath : pkgpath p =
+    p_git_path || p_pkgpath_legacy
 
 val p_hash : string p = eat (L.Symb #"#") ->> p_id
 
@@ -107,6 +127,16 @@ fun parse (ts:(token*reg) list) : t =
         OK (v,_,_) => v
       | NO (loc,f) => raise Fail ("parse error at location "
                                   ^ R.ppLoc loc ^ ": " ^ f())
+
+fun pkgpathFromString (p:string) : pkgpath option =
+    let val ts = L.lex "arg" p
+        val parsed = (p_pkgpath) ts
+    in case parsed of
+        OK (v,_,_) => SOME v
+      | NO (loc,f) => raise Fail ("parse error at location "
+                                  ^ R.ppLoc loc ^ ": " ^ f() ^" in " ^ p)
+    end
+
 end
 
 fun fromString (filename:string) (content:string) : t =
@@ -158,5 +188,6 @@ fun isCommitVersion (v:semver) : string option =
 
 fun commitVersion (time:string) (commit:string) : semver option =
     SemVer.fromString ("0.0.0-" ^ time ^ "+" ^ commit)
+
 
 end
