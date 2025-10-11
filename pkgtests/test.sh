@@ -5,8 +5,8 @@
 
 set -e # Die on error.
 
-FUTPKG="../src/futpkg"
-#FUTPKG="../src/futpkg -v"
+#FUTPKG="../src/futpkg"
+FUTPKG="../src/futpkg -v"
 #FUTPKG="futhark pkg"
 
 lastrun=""

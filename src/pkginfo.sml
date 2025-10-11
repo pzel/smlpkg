@@ -150,6 +150,15 @@ struct
            | _ => raise Fail ("Cannot find HEAD ref for " ^ repo_url)
       end
 
+
+  fun genericGitPkgInfo (p: pkgpath) (versions: int list) : pkg_info =
+      let val repo_url = String.concat([#protocol p, #protocol_user p, "@",
+                                        #host p, "/", #owner p, "/", #repo p])
+          fun mk_archive_url r = "TODO:No-archive-available-for-generic-git-repos"
+          fun mk_manifest_url r = "TODO:No-manifest-available-for-generic-git-repos"
+      in ghglPkgInfo repo_url mk_archive_url mk_manifest_url (#owner p) (#repo p) versions "v"
+      end
+
   fun ghPkgInfo (owner:string) (repo:string) (versions:int list) : pkg_info =
       let val repo_url = "https://github.com/" ^ owner ^ "/" ^ repo
           fun mk_archive_url r = repo_url ^ "/archive/" ^ r ^ ".zip"
@@ -188,8 +197,10 @@ struct
           let val (p',vs) = majorRevOfPkg p
           in glPkgInfo (#owner p) (#repo p') vs
           end
-        | _ => raise Fail ("only github.com or gitlab.com\
-                           \ are supported as hosts.")
+        | host =>
+          let val (p',vs) = majorRevOfPkg p
+          in genericGitPkgInfo p' vs
+          end
 
   (* Cached access *)
 

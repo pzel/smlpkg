@@ -17,7 +17,7 @@ end
 
 type pkgpath = {protocol:string,protocol_user:string,host:string,owner:string,repo:string}
 
-fun mkPkgPath host owner repo = {protocol="ssh:",
+fun mkPkgPath host owner repo = {protocol="ssh://",
                                  protocol_user="git",
                                  host=host,
                                  owner=owner,
@@ -81,7 +81,7 @@ val p_git_path : pkgpath p =
            >>> (p_id >>- eat (L.Symb #":"))
            >>> (p_id >>- eat (L.Symb #"/"))
            >>> p_id)
-          oo (fn (((a,b),c),d) => {protocol="ssh:",
+          oo (fn (((a,b),c),d) => {protocol="ssh://",
                                    protocol_user=a,
                                    host=b,
                                    owner=c,

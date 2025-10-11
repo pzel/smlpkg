@@ -19,10 +19,10 @@ val () = test "empty-mp-repo" (fn () => SOME "repo" = Option.map #repo (package(
 val mp2 = "package git@git.sr.ht:~user/foobar.git require {}"
 val mp2package = package(fromString "str" mp2)
 val () = test "requires-are-null" (fn () => null(requires(fromString "str" mp2)))
-
 val () = test "host-is-parsed" (fn () => SOME "git.sr.ht" = Option.map #host mp2package)
-val () = test "empty-mp-owner" (fn () => SOME "~user" = Option.map #owner mp2package)
-val () = test "empty-mp-repo" (fn () => SOME "foobar" = Option.map #repo mp2package)
+val () = test "owner-is-parsed" (fn () => SOME "~user" = Option.map #owner mp2package)
+val () = test "protocol-is-inferred" (fn () => SOME "ssh://" = Option.map #protocol mp2package)
+val () = test "protocol-usesr-is-parsed" (fn () => SOME "git" = Option.map #protocol_user mp2package)
 
 
 val mr1 = "require { github.com/owner/repo 1.2.3 #asdefsde }"
